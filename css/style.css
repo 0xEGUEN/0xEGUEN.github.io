@@ -2412,6 +2412,8 @@ body.light-mode .gallery-link:hover {
   font-weight: 700;
   letter-spacing: 0.3px;
   transition: all 220ms ease;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .about-spotlight__switch-btn:hover {
