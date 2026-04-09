@@ -1,6 +1,6 @@
 const isMobileDevice = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-         (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+  const mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+  return mobileUA.test(navigator.userAgent) || (navigator.maxTouchPoints > 2);
 };
 const SITE_VERSION = '2026-04-05-i18n-data-1';
 const LANGUAGE_STORAGE_KEY = 'site-language';
@@ -18,10 +18,9 @@ if (!Object.prototype.hasOwnProperty.call(LANGUAGE_META, activeLanguage)) {
 let languageObserver = null;
 let languageReapplyPending = false;
 let isApplyingLanguage = false;
-const normalizeI18nText = (value) => (value || '').replace(/\s+/g, ' ').trim();
-const getCurrentLanguageLocale = () => {
-  const info = LANGUAGE_META[activeLanguage];
-  return info ? info.locale : 'en-US';
+const normalize = (text) => (text || '').replace(/\s+/g, ' ').trim();
+const getLocale = () => {
+  return LANGUAGE_META[activeLanguage]?.locale || 'en-US';
 };
 const loadLanguageDictionary = async () => {
   try {
@@ -52,20 +51,19 @@ const translateRawText = (value, language = activeLanguage) => {
   const trailing = (value.match(/\s*$/) || [''])[0];
   return `${leading}${translated}${trailing}`;
 };
-const shouldSkipTextNode = (node) => {
-  if (!node || !node.parentElement) return true;
+const shouldSkip = (node) => {
+  if (!node?.parentElement) return true;
   const parent = node.parentElement;
   if (parent.closest('[data-no-translate="true"]')) return true;
   if (parent.closest('.material-symbols-outlined')) return true;
-  const tagName = parent.tagName;
-  if (tagName === 'SCRIPT' || tagName === 'STYLE' || tagName === 'NOSCRIPT') return true;
-  return !normalizeI18nText(node.nodeValue);
+  if (['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(parent.tagName)) return true;
+  return !normalize(node.nodeValue);
 };
 const applyTextNodeTranslations = (language = activeLanguage) => {
   if (!document.body) return;
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
-      return shouldSkipTextNode(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      return shouldSkip(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
     },
   });
   const textNodes = [];
@@ -73,35 +71,25 @@ const applyTextNodeTranslations = (language = activeLanguage) => {
     textNodes.push(walker.currentNode);
   }
   textNodes.forEach((node) => {
-    if (typeof node.__i18nOriginal !== 'string') {
-      node.__i18nOriginal = node.nodeValue;
-    }
+    node.__i18nOriginal ??= node.nodeValue;
     const translated = translateRawText(node.__i18nOriginal, language);
-    if (node.nodeValue !== translated) {
-      node.nodeValue = translated;
-    }
+    if (node.nodeValue !== translated) node.nodeValue = translated;
   });
 };
 const applyAttributeTranslations = (language = activeLanguage) => {
   if (!document.body) return;
-  const attrMap = [
-    { attr: 'placeholder', key: 'i18nPlaceholderOriginal' },
-    { attr: 'aria-label', key: 'i18nAriaLabelOriginal' },
-    { attr: 'title', key: 'i18nTitleOriginal' },
-  ];
-  const selector = attrMap.map(({ attr }) => `[${attr}]`).join(',');
+  const attrs = ['placeholder', 'aria-label', 'title'];
+  const attrKeys = ['i18nPlaceholderOriginal', 'i18nAriaLabelOriginal', 'i18nTitleOriginal'];
+  const selector = attrs.map(a => `[${a}]`).join(',');
   document.querySelectorAll(selector).forEach((element) => {
     if (element.closest('[data-no-translate="true"]')) return;
-    attrMap.forEach(({ attr, key }) => {
+    attrs.forEach((attr, i) => {
+      const key = attrKeys[i];
       const currentValue = element.getAttribute(attr);
       if (!currentValue) return;
-      if (!element.dataset[key]) {
-        element.dataset[key] = currentValue;
-      }
+      element.dataset[key] ??= currentValue;
       const translated = translateRawText(element.dataset[key], language);
-      if (translated && currentValue !== translated) {
-        element.setAttribute(attr, translated);
-      }
+      if (translated && currentValue !== translated) element.setAttribute(attr, translated);
     });
   });
 };
@@ -221,27 +209,19 @@ const initializeLanguageSwitcher = async () => {
   }
 };
 const isTouchDevice = () => {
-  return (('ontouchstart' in window) || 
-          (navigator.maxTouchPoints > 0) || 
-          (navigator.msMaxTouchPoints > 0));
+  return ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 };
 const isLowPerformanceDevice = () => {
-  if (navigator.deviceMemory && navigator.deviceMemory <= 4) {
-    return true;
-  }
-  if (navigator.connection && navigator.connection.effectiveType) {
-    return navigator.connection.saveData === true ||
-           navigator.connection.effectiveType === 'slow-2g' ||
-           navigator.connection.effectiveType === '2g' ||
-           navigator.connection.effectiveType === '3g';
-  }
-  return false;
+  if (navigator.deviceMemory <= 4) return true;
+  const conn = navigator.connection;
+  if (!conn) return false;
+  return conn.saveData || ['slow-2g', '2g', '3g'].includes(conn.effectiveType);
 };
 const shouldUseDesktopEffects = () => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
-  return window.matchMedia('(hover: hover)').matches &&
-         window.matchMedia('(pointer: fine)').matches &&
-         !isLowPerformanceDevice();
+  const hasHover = window.matchMedia('(hover: hover)').matches;
+  const finePo = window.matchMedia('(pointer: fine)').matches;
+  return hasHover && finePo && !isLowPerformanceDevice();
 };
 let isZooming = false;
 let zoomTimeout = null;
@@ -249,16 +229,12 @@ const detectZoom = () => {
   if (!isMobileDevice()) return;
   isZooming = true;
   document.documentElement.classList.add('zoomed');
-  // Pause animations & effects during zoom
   document.body.style.willChange = 'auto';
   clearTimeout(zoomTimeout);
   zoomTimeout = setTimeout(() => {
     isZooming = false;
     document.documentElement.classList.remove('zoomed');
-    // Resume animations
-    if (shouldUseDesktopEffects()) {
-      document.body.style.willChange = 'transform';
-    }
+    if (shouldUseDesktopEffects()) document.body.style.willChange = 'transform';
   }, 800);
 };
 if (isMobileDevice()) {
