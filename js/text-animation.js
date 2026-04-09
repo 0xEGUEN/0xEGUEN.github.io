@@ -8,10 +8,10 @@ const text = anime.text || { split: () => ({ addEffect: () => {} }) };
 const splitText = text.split || (() => ({ addEffect: () => {} }));
 const isCompactMotion = () => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
-  const coarsePointer = window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(any-pointer: coarse)').matches;
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
   const noHover = window.matchMedia('(hover: none)').matches;
-  const lowMemory = navigator.deviceMemory && navigator.deviceMemory <= 4;
-  return coarsePointer || noHover || lowMemory;
+  const lowMem = navigator.deviceMemory <= 4;
+  return coarse || noHover || lowMem;
 };
 let heroSplitStarted = false;
 const initHeroSplitAnimation = async () => {
