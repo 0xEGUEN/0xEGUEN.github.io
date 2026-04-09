@@ -380,15 +380,13 @@ const cursor = document.getElementById('cursor');
 const cursorGlow = document.getElementById('cursor-glow');
 const cursorTrackingSpeed = 0.15;
 
-// Disable custom cursor on mobile untuk better performance
+// Custom cursor for desktop
 if (cursor && cursorGlow && !isMobileDevice()) {
   let mouseX = 0, mouseY = 0;
   let cursorX = 0, cursorY = 0;
   let glowX = 0, glowY = 0;
   let glowAnimationId = null;
   let isPageVisible = true;
-  
-  // Trail particle effect
   function createTrailParticle(x, y) {
     const particle = document.createElement('div');
     particle.style.position = 'fixed';
@@ -404,14 +402,11 @@ if (cursor && cursorGlow && !isMobileDevice()) {
     particle.style.opacity = '1';
     particle.style.transition = 'opacity 0.6s ease-out';
     document.body.appendChild(particle);
-    
-    // Fade out
     setTimeout(() => {
       particle.style.opacity = '0';
       setTimeout(() => particle.remove(), 600);
     }, 100);
   }
-  
   document.addEventListener('visibilitychange', () => {
     isPageVisible = !document.hidden;
     if (isPageVisible) {
@@ -424,7 +419,6 @@ if (cursor && cursorGlow && !isMobileDevice()) {
   document.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
-    // Create trail setiap gerakan
     if (Math.random() > 0.7) {
       createTrailParticle(mouseX, mouseY);
     }
@@ -432,12 +426,8 @@ if (cursor && cursorGlow && !isMobileDevice()) {
   
   function animateGlow() {
     if (!isPageVisible) return;
-    
-    // Update cursor position - sekarang langsung pakai mouseX/Y (transform handle centering)
     cursorX = mouseX;
     cursorY = mouseY;
-    
-    // Update glow position (smooth) - centered dengan transform
     glowX += (mouseX - glowX) * cursorTrackingSpeed;
     glowY += (mouseY - glowY) * cursorTrackingSpeed;
     
@@ -449,18 +439,14 @@ if (cursor && cursorGlow && !isMobileDevice()) {
       cursorGlow.style.left = glowX + 'px';
       cursorGlow.style.top = glowY + 'px';
     }
-    
     glowAnimationId = requestAnimationFrame(animateGlow);
   }
-  
   function startGlowAnimation() {
     if (!glowAnimationId) {
       glowAnimationId = requestAnimationFrame(animateGlow);
     }
   }
-  
   startGlowAnimation()
-  
   const interactiveElements = document.querySelectorAll('button, a, .btn, input, textarea, .contact-card, .blog-card, .gallery-item, .chip');
   interactiveElements.forEach(element => {
     element.addEventListener('mouseenter', () => {
@@ -764,26 +750,25 @@ function initializeClock() {
   drawClock();
   // Track theme state to avoid unnecessary redraws
   let lastTheme = document.body.classList.contains('light-mode');
-  // Update clock every second and stop on page hidden or during zoom
+
   function startClockUpdate() {
     clockUpdateInterval = setInterval(() => {
-      // Skip updates during zoom to prevent jank
+
       if (document.hidden || isZooming) {
         return;
       }
-      // Check if theme changed and redraw
+
       const currentTheme = document.body.classList.contains('light-mode');
       if (currentTheme !== lastTheme) {
         lastTheme = currentTheme;
         drawClock();
       } else {
-        // Just update the clock display
+  
         drawClock();
       }
     }, 1000);
   }
   startClockUpdate();
-  // Handle visibility changes
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       if (clockUpdateInterval) clearInterval(clockUpdateInterval);
@@ -829,7 +814,7 @@ if (techSlider) {
   function updateSlider() {
     const translateX = -currentSlide * (100 / totalSlides);
     techSlider.style.transform = `translateX(${translateX}%)`;
-    // Update dots
+
     dots.forEach((dot, index) => {
       dot.classList.toggle('active', index === currentSlide);
     });
@@ -852,7 +837,7 @@ if (techSlider) {
   dots.forEach((dot, index) => {
     dot.addEventListener('click', () => goToSlide(index));
   });
-  // Auto-slide every 5 seconds with visibility check
+
   let sliderInterval = setInterval(() => {
     if (!document.hidden) nextSlide();
   }, 5000);
@@ -965,7 +950,7 @@ if (typeof anime !== 'undefined') {
   if (logoElement) {
     let rotations = 0;
     
-    // Animasi bounce untuk logo dengan loop
+
     anime({
       targets: '.logo.js',
       scale: [
@@ -976,7 +961,7 @@ if (typeof anime !== 'undefined') {
       loopDelay: 250
     });
     
-    // Implementasi drag untuk logo
+
     let isDragging = false;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
