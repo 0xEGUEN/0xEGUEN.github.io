@@ -949,9 +949,8 @@ if (typeof anime !== 'undefined') {
   
   if (logoElement) {
     let rotations = 0;
-    
 
-    anime({
+anime({
       targets: '.logo.js',
       scale: [
         { value: 1.25, duration: 200, easing: 'easeInOutQuad' },
@@ -960,9 +959,8 @@ if (typeof anime !== 'undefined') {
       loop: true,
       loopDelay: 250
     });
-    
 
-    let isDragging = false;
+let isDragging = false;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
     let currentX = 0;
@@ -1027,4 +1025,5 @@ if (typeof anime !== 'undefined') {
     }
   }
 }
+
 

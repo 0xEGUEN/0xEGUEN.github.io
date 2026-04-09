@@ -189,3 +189,4 @@ if (document.readyState === 'complete') {
   window.addEventListener('load', initSectionRevealAnimations, { once: true });
 }
 
+
