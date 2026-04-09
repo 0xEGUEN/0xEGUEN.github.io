@@ -3290,6 +3290,9 @@ body.light-mode .toast {
   .clock-widget {
     margin-bottom: 24px;
   }
+  .page-header-fx__orb {
+    display: none;
+  }
 }
 
 @media (max-width: 720px) {
@@ -3298,6 +3301,10 @@ body.light-mode .toast {
     gap: 12px;
     margin-bottom: 20px;
   }
+  .page-header-fx__orb {
+    display: none;
+  }
+}
   
   .clock-container {
     width: 100px;
