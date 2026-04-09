@@ -717,7 +717,7 @@ function initializeClock() {
     if (dateDisplay) {
       const now = new Date();
       const options = { month: 'short', day: 'numeric', year: 'numeric' };
-      const dateString = now.toLocaleDateString(getCurrentLanguageLocale(), options);
+      const dateString = now.toLocaleDateString(getLocale(), options);
       dateDisplay.textContent = dateString;
     }
   }
