@@ -19,6 +19,7 @@ let languageObserver = null;
 let languageReapplyPending = false;
 let isApplyingLanguage = false;
 const normalize = (text) => (text || '').replace(/\s+/g, ' ').trim();
+const normalizeI18nText = (text) => normalize(text);
 const getLocale = () => {
   return LANGUAGE_META[activeLanguage]?.locale || 'en-US';
 };
